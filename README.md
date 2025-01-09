@@ -21,6 +21,8 @@ bess_hdeepc.m -  This is the HDeePC simulation
 
 bess_plots.m  -  Run this after running all the files above to see the Example 1 figure. 
 
+sys_dc.mat           - This is the system data (A,B,C,D) file for Example 2. Reproduced from https://github.com/4flixt/DeePC_Perspective. 
+
 triple_mass_hdeepc.m - This runs Example 2 for varying numbers of known state / output equations. Adjust p_k and n_u to replicate Table I. 
 
 triple_mass_hdeepc.m - This runs Example 2 for a time-varying system. Adjust p_k and n_u to replicate Table II. 
