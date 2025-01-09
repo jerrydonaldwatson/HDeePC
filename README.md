@@ -14,8 +14,11 @@ Jeremy Watson, 2025: jeremy.watson (at) canterbury.ac.nz
 
 # Files:
 bess_config.m -  Run this first to set the configuration for the BESS example (Example 1).
+
 bess_deepc.m  -  This is the DeePC simulation
+
 bess_hdeepc.m -  This is the HDeePC simulation
+
 bess_plots.m  -  Run this after running all the files above to see the Example 1 figure. 
 
 triple_mass_hdeepc.m - This runs Example 2 for varying numbers of known state / output equations. Adjust p_k and n_u to replicate Table I. 
