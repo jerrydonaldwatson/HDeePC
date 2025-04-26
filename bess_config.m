@@ -32,14 +32,14 @@ Rload = 50;
 Lline = 5e-3; % Line inductance
 tq = 1e-4; % 1 / SoC time constant
 
-% Generate random generation/load
-u_genload = randn(1,lengthSim+N)*randnGenLoad;
-
 %% DeePC Controller
 % Horizons etc
 Tini = 50;      % Past data for learning the system
 N = 10;         % Horizon
 T = 200;        % Initial simulation to gather data
+
+% Generate random generation/load
+u_genload = randn(1,lengthSim+N)*randnGenLoad;
 
 % Cost function weights
 Q = diag([0.001, 5e4]);
