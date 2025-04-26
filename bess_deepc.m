@@ -118,7 +118,7 @@ true_y_sim = y_sim; % true system dynamics without measurement noise, for plots
 cost_u(lengthSim) = 0;
 cost_y(lengthSim) = 0;
 u_sim(2,lengthSim) = 0;
-tic
+comp_cost(lengthSim) = 0;
 for k = 1:lengthSim
 
     k
@@ -126,6 +126,8 @@ for k = 1:lengthSim
     predictedGenLoad  = u_genload(k:k+N-1)';
 
     % Solve optimisation problem using cvx
+    tic
+
     cvx_begin quiet
     cvx_precision best
 
@@ -133,7 +135,6 @@ for k = 1:lengthSim
     variable u(N*m,1);
     variable y(N*p,1);
     variable sigma_y(Tini*p,1);
-    variable q(N,1);
 
     minimize quad_form(y-r,Qexpanded) + quad_form(u,Rexpanded) + lg * norm(g,1) + ly * norm(sigma_y,1) % Complete cost function
 
@@ -155,6 +156,8 @@ for k = 1:lengthSim
 
     cvx_end
 
+    comp_cost(k) = toc;
+    
     % Assign outputs for next time-step (at present, recalculating every step...)
     u_sim(2,k) = u(2);
     if ~isnan(u(1))
@@ -181,7 +184,6 @@ for k = 1:lengthSim
     cost_y(k) = quad_form(true_y_sim(1, k)-r(1),Q(1,1)) + quad_form(true_y_sim(2, k)-r(2),Q(2,2));
     cost_u(k) = R * u(1) ^ 2;
 end
-toc
 
 %% Plots
 % figure(1)
@@ -213,5 +215,6 @@ title('Node voltage deviation')
 subplot(3,1,3)
 plot(1:k,true_y_sim(2,1:k))
 title('BESS SoC')
+
 
 save deepc

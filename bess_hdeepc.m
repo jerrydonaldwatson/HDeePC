@@ -162,7 +162,7 @@ end
 cost_u(lengthSim) = 0;
 cost_y(lengthSim) = 0;
 u_sim(2,lengthSim) = 0;
-tic
+comp_cost(lengthSim) = 0;
 for k = 1:lengthSim
 
     k
@@ -170,6 +170,8 @@ for k = 1:lengthSim
     predictedGenLoad  = u_genload(k:k+N-1)';
 
     % Solve optimisation problem using cvx
+    tic
+   
     cvx_begin quiet
     cvx_precision best
 
@@ -212,6 +214,8 @@ for k = 1:lengthSim
 
     cvx_end
 
+    comp_cost(k) = toc;
+
     if ~isnan(u(1))
         u_sim(1,k) = u(1);
     else
@@ -235,7 +239,6 @@ for k = 1:lengthSim
     cost_y(k) = quad_form(true_y_sim(1, k)-r(1),Q(1,1)) + quad_form(true_y_sim(2, k)-rq(1),Q(2,2));
     cost_u(k) = R * u_sim(1,k) ^ 2;
 end
-toc
 
 %% Plots
 % figure(1)
