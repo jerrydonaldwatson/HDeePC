@@ -1,4 +1,4 @@
-This folder contains the files needed to run Case Study 3 (Larger power system).
+This folder contains the files needed to run Case Study 1c (nonlinear system with unknown nonlinear part).
 Jeremy Watson, 2025
 
 This code accompanies our paper: "Hybrid Data-Enabled Predictive
