@@ -89,7 +89,7 @@ for k = 1:lengthSim
         
         cost = 0;
         for i = 1:N
-            cost = cost + (y(:, i) - r((i-1)*p+1:i*p))'* Qmat * (y(:, i) - r((i-1)*p+1:i*p)) + u(:, i)'* Rmat * u(:, i);
+            cost = cost + quad_form(y(:, i) - r((i-1)*p+1:i*p), Qmat) + quad_form(u(:, i), Rmat);
         end
         cost = cost + 1e6 * norm(slack_y);
         
@@ -152,3 +152,4 @@ legend('y_1', 'y_2', 'y_3')
 subplot(3,1,3)
 plot(1:lengthSim,cost_y + cost_u)
 legend('Cost')
+
