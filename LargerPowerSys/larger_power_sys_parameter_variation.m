@@ -18,7 +18,7 @@ clc
 
 %% System Set Up
 lengthSim = 10; % Timestep is 0.1 s
-noiseM = 2e-5; % Uniform distribution with this limit
+noiseM = 1e-5; % Uniform distribution with this limit
 % Can be adjusted to Gaussian noise with \sigma = noiseM by changing rand()
 % to randn() in appropriate places.
 
@@ -31,7 +31,7 @@ Ctrue = eye(length(Atrue));
 Dtrue = zeros(length(Atrue), size(Btrue,2));
 
 % Load (potentially perturbed) system matrices
-load power_grid_u20.mat % replace with perturbed data
+load power_grid_u40.mat % replace with perturbed state-space
 A = power_grid_ssd.A;
 B = power_grid_ssd.B;
 B(:,3:6) = B(:,3:6) .* 1e3; % Scale units to kW
@@ -70,8 +70,8 @@ for p_u = [0 9 17 34 51 60 68]
     reducedTol = 1e-3; % Large-scale problem so reduce tolerances a bit
 
     % Cost function weights
-    Q = 1e-3; % All states and inputs are currently weighted the same
-    R = 1e-1;
+    Q = 0.001; % All states are currently weighted the same
+    R = 0.05; 
     Qexpanded = diag(Q * ones(1,N*p_u));
     Rexpanded = diag(R * ones(1,N*m));
 
@@ -191,8 +191,8 @@ for p_u = [0 9 17 34 51 60 68]
         + sum_square(chol(Q * eye(N*p_k)) * expr_yk) ...
         + sum_square(chol(Rexpanded) * u) ...
         + lg * norm(g,1) ...
-        + lu * norm(sigma_u,1) ...
-        + ly * norm(sigma_y,1) )
+        + lu * norm(sigma_u,2) ...
+        + ly * norm(sigma_y,2) )
 
         % Data-based part
         if n_u > 0

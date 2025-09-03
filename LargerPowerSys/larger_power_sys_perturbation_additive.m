@@ -18,8 +18,8 @@ clc
 
 %% System Set Up
 lengthSim = 10; % Timestep is 0.1 s
-noiseM = 2e-5; % Uniform distribution with this limit
-perturbationLevel = 0.001; % = standard deviation of perturbationLevel * 100 %
+noiseM = 1e-5; % Uniform distribution with this limit
+perturbationLevel = 0.02; % = standard deviation of perturbationLevel * 100 %
 
 % Load System Matrices
 load power_grid_u00.mat
@@ -29,28 +29,43 @@ Btrue(:,3:6) = Btrue(:,3:6) .* 1e3; % Scale units to kW
 Ctrue = eye(length(Atrue));
 Dtrue = zeros(length(Atrue), size(Btrue,2));
 
-% Low-rank additive perturbation of system matrices
+% Additive perturbation of system matrices
 rng(1)
 
-rankPerturb = 2;   % <-- adjust as desired
+% parameters
+nRowsChanged = 4;
 
-% Random low-rank factors for A
-U_A = randn(size(Atrue,1), rankPerturb);
-V_A = randn(size(Atrue,2), rankPerturb);
-perturbA_raw = U_A * V_A';
-perturbA = perturbationLevel * norm(Atrue,'fro') * ...
-           perturbA_raw / max(norm(perturbA_raw,'fro'), eps);
+% random raw perturbations
+perturbA_raw = randn(size(Atrue));
+perturbB_raw = randn(size(Btrue));
 
-% Random low-rank factors for B
-U_B = randn(size(Btrue,1), rankPerturb);
-V_B = randn(size(Btrue,2), rankPerturb);
-perturbB_raw = U_B * V_B';
-perturbB = perturbationLevel * norm(Btrue,'fro') * ...
-           perturbB_raw / max(norm(perturbB_raw,'fro'), eps);
+% --- A: mask random (unique) index pairs, build masked perturbation, scale to Frobenius target
+% choose unique index pairs for A
+idxA_lin = sub2ind(size(Atrue), ...
+                   randsample(length(Atrue), nRowsChanged, true), ...
+                   randsample(length(Atrue), nRowsChanged, true));
 
-% Apply perturbation additively
+perturbA_masked = zeros(size(Atrue));
+perturbA_masked(idxA_lin) = perturbA_raw(idxA_lin);
+
+den = max(norm(perturbA_masked,'fro'), eps);
+perturbA = perturbationLevel * norm(Atrue,'fro') * (perturbA_masked / den);
 A = power_grid_ssd.A + perturbA;
+
+% --- B: mask random (unique) index pairs, build masked perturbation, scale to Frobenius target
+% choose unique index pairs for B
+idxB_lin = sub2ind(size(Btrue), ...
+                   randsample(size(Btrue,1), nRowsChanged, true), ...
+                   randsample(size(Btrue,2), nRowsChanged, true));
+
+perturbB_masked = zeros(size(Btrue));
+perturbB_masked(idxB_lin) = perturbB_raw(idxB_lin);
+
+denB = max(norm(perturbB_masked,'fro'), eps);
+perturbB = perturbationLevel * norm(Btrue,'fro') * (perturbB_masked / denB);
 B = power_grid_ssd.B + perturbB;
+
+
 B(:,3:6) = B(:,3:6) .* 1e3; % Scale units to kW
 C = eye(length(A));
 D = zeros(length(A), size(B,2));
@@ -87,8 +102,8 @@ for p_u = [0 9 17 34 51 60 68]
     reducedTol = 1e-3; % Reduced tolerance for large-scale problem
 
     % Cost function weights
-    Q = 1e-3; % All states and inputs are currently weighted the same
-    R = 1e-1;
+    Q = 0.001; % All states are currently weighted the same
+    R = 0.05; 
     Qexpanded = diag(Q * ones(1,N*p_u));
     Rexpanded = diag(R * ones(1,N*m));
 
@@ -208,8 +223,8 @@ for p_u = [0 9 17 34 51 60 68]
         + sum_square(chol(Q * eye(N*p_k)) * expr_yk) ...
         + sum_square(chol(Rexpanded) * u) ...
         + lg * norm(g,1) ...
-        + lu * norm(sigma_u,1) ...
-        + ly * norm(sigma_y,1) )
+        + lu * norm(sigma_u,2) ...
+        + ly * norm(sigma_y,2) )
 
         % Data-based part
         if n_u > 0
