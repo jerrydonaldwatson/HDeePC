@@ -217,7 +217,7 @@ for k = 1:lengthSim
     true_y_sim(:, k) = C * x(:, k) + D * u_sim(:, k);
 
     % Observer update (Luenberger)
-    x_hat(p_u+1:end,k+1) = A_k * x_hat(n_u+1:end,k) + A_c*y_sim(1:p_u,k) + B_k * u_sim(:, k) + L * (y_sim(p_u+1:end,k) - C_k * x_hat(n_u+1:end,k) - D_k * u_sim(:, k));
+    x_hat(p_u+1:end,k+1) = A_k * x_hat(n_u+1:end,k) + A_y*y_sim(1:p_u,k) + B_k * u_sim(:, k) + L * (y_sim(p_u+1:end,k) - C_k * x_hat(n_u+1:end,k) - D_k * u_sim(:, k));
 
     % Update data vectors - new data at the end of the vector
     if n_u > 0
@@ -249,4 +249,5 @@ legend('y_1', 'y_2', 'y_3')
 
 subplot(3,1,3)
 plot(1:k,cost_y + cost_u)
+
 legend('Cost')
